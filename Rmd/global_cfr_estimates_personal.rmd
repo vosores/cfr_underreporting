@@ -1,0 +1,319 @@
+---
+title: "Using a delay-adjusted case fatality ratio to estimate under-reporting"
+output: 
+  html_document:
+    theme: cosmo
+bibliography: resources/library.bib
+csl: resources/bmj.csl
+---
+
+```{r load-packages, include = FALSE}
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(patchwork)
+library(NCoVUtils)
+library(base64enc)
+library(htmltools)
+library(mime)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r settings}
+## Report date
+target_date <- Sys.Date()
+```
+
+*Timothy W Russell<sup>&ast;</sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Nick Golding, Hamish Gibbs, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
+
+<sup> † </sup> authors contributed equally
+
+<sup> &ast; </sup> corresponding author
+
+*Last Updated:* `r target_date`
+  
+## Aim
+
+To estimate the percentage of symptomatic COVID-19 cases reported in different countries using case fatality ratio estimates based on data from the ECDC, correcting for delays between confirmation-and-death.
+
+## Data availability
+
+The under-reporting estimates for all countries can be downloaded as a single .csv file [here](https://raw.githubusercontent.com/cmmid/cmmid.github.io/master/topics/covid19/reports/under_ascertainment_estimates.csv). 
+
+Similarly, the prevalence estimates can be downloaded as a single .csv file [here](https://raw.githubusercontent.com/cmmid/cmmid.github.io/master/topics/covid19/reports/currentPrevalenceEstimates_12_06_2020.csv).
+
+## Methods Summary
+
+* In real-time, dividing deaths-to-date by cases-to-date leads to a biased estimate of the case fatality ratio (CFR), because this calculation does not account for delays from confirmation of a case to death, and under-reporting of cases.
+
+* Using the distribution of the delay from hospitalisation-to-death for cases that are fatal, we can estimate how many cases so far are expected to have known outcomes (i.e. death or recovery), and hence adjust the naive estimates of CFR to account for these delays.
+
+* The adjusted CFR does not account for under-reporting. However, the best available estimates of CFR (adjusting or controlling for under-reporting) are in the 1% - 1.5% range [@russell2020estimating; @verity2020estimates; @guan2020clinical; @shim2020estimating]. Large studies in China and South Korea estimating the CFR at 1.38% (95% CrI: 1.23–1.53%)[@verity2020estimates] and 1.4% (95% CrI: 1.2-1.7%)[@shim2020estimating] respectively. Based on these studies, and for simplicity, we assume a baseline CFR of 1.4% for our analysis.
+
+* If a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, $\frac{1.4}{20}=7.0\%$ cases reported approximately).
+
+* We then go on to use these under-reporting estimates to adjust the confirmed case curves to arrive at adjusted new cases per day curves and prevalence estimates
+
+* The prevalence estimates are calculated by tallying up over the last 10 days of adjusted incidence, which serves as a crude proxy for prevalence
+
+## Current estimates for percentage of symptomatic cases reported for countries with greater than ten deaths {.tabset}
+
+### Temporal variation
+
+```{r include = FALSE}
+allDatRaw <- rio::import("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-06-21.xlsx") %>%
+    dplyr::rename(date = dateRep, 
+                  country = countriesAndTerritories,
+                  countryCode = countryterritoryCode) %>%
+    dplyr::mutate(date = lubridate::ymd(date))
+
+countryCodesLookUp <- allDatRaw %>%
+  dplyr::select(country, 
+                countryCode) %>% 
+  unique()
+
+deathSummaryData <- allDatRaw %>%
+  dplyr::group_by(country) %>%
+  dplyr::summarise(totalDeaths = sum(deaths)) %>% 
+  dplyr::mutate(country_order = rank(totalDeaths)) %>%
+  dplyr::arrange(desc(country_order))
+
+caseSummaryData <- allDatRaw %>%
+  dplyr::group_by(country) %>%
+  dplyr::summarise(totalCases = sum(cases))
+
+
+data_path <- "~/Dropbox/bayesian_underreporting_estimates/current_estimates_extracted_not_age_adjusted/"
+files <- dir(path = data_path,
+             pattern = "*.rds")
+
+dataTmp <- dplyr::tibble(countryCode = files) %>% 
+  dplyr::mutate(file_contents = purrr::map(countryCode, 
+                                           ~ readRDS(file.path(data_path, .)))
+                
+  ) %>% 
+  tidyr::unnest(cols = c(file_contents)) %>%
+  dplyr::mutate(countryCode = stringr::str_remove(countryCode, "result_")) %>% 
+  dplyr::mutate(countryCode = stringr::str_remove(countryCode, ".rds")) %>%
+  dplyr::group_by(countryCode) %>%
+  #dplyr::mutate(date = seq(Sys.Date() - 13 - dplyr::n()  + 1, Sys.Date() - 13, 1)) %>% 
+  dplyr::select(date, everything()) %>%
+  dplyr::left_join(countryCodesLookUp) %>%
+  dplyr::select(date, country, countryCode, everything()) %>%
+  dplyr::group_by(countryCode) %>%
+  dplyr::ungroup()
+
+underReportingData <- dataTmp %>% 
+  dplyr::left_join(deathSummaryData, by = c('country' = 'country')) %>% 
+  dplyr::left_join(caseSummaryData, by = c('country' = 'country')) %>% 
+  dplyr::arrange(desc(country_order), date) 
+
+dataPlotTemporal <- underReportingData %>% 
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
+  dplyr::group_by(country) %>%
+  dplyr::filter(dplyr::n() > 20) %>%
+  dplyr::ungroup() %>%
+  #dplyr::mutate_at(dplyr::vars(country), dplyr::funs(factor(., levels=unique(.)))) %>%
+  dplyr::mutate(estimate = estimate*100,
+                lower = lower*100,
+                upper = upper*100) %>%
+  dplyr::filter(!(country == "China" & date > "2020-03-15")) %>%
+  dplyr::arrange(country)
+
+dataTrueCases <- allDatRaw %>%
+  dplyr::mutate(date = as.Date(date)) %>%
+  dplyr::left_join(underReportingData) %>%
+  dplyr::select(date, country, cases, deaths, estimate, lower, upper) %>%
+  dplyr::group_by(country) %>%
+  dplyr::arrange(date, .by_group = TRUE) %>%
+  tidyr::drop_na() %>%
+  dplyr::mutate(trueCasesMid = smooth::sma(cases/estimate)$fitted,
+                trueCasesLow = smooth::sma(cases/upper)$fitted,
+                trueCasesHigh =smooth::sma(cases/lower)$fitted) %>%
+  dplyr::ungroup(country) %>%
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
+  dplyr::filter(!(country == "China" & date > "2020-03-15")) %>%
+  dplyr::filter(!(country == "Paraguay")) %>%
+  dplyr::filter(dplyr::n() > 20) 
+
+dataPlot <- underReportingData %>% 
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
+  dplyr::filter(date == max(date)) %>% 
+    dplyr::mutate(
+      country = country  %>%
+        factor(levels = underReportingData %>% 
+                 dplyr::arrange(desc(estimate)) %>%
+                 dplyr::pull(country) %>%
+                 unique())) 
+
+
+dataTable <- underReportingData %>%
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
+  dplyr::filter(date == max(date)) %>% 
+  dplyr::mutate(estimate = estimate*100,
+                lower = lower*100,
+                upper = upper*100) %>%
+  dplyr::mutate(estimate = paste0(signif(estimate,2),
+                                  "%", " " , "(", signif(lower,2), "%",
+                                  "-", signif(upper, 2), "%", ")")) %>%
+  dplyr::arrange(country) %>%
+  dplyr::select(country, estimate, totalCases, totalDeaths)
+```
+
+
+```{r include = TRUE, fig.width = 10, fig.height = 40, out.width = '100%'}
+plotTemporal <- dataPlotTemporal %>%
+  ggplot2::ggplot(ggplot2::aes(x = date)) +
+  #ggplot2::geom_line(ggplot2::aes(y = estimate)) + 
+  ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), fill = "dodgerblue", alpha = 0.4) + 
+  ggplot2::facet_wrap(~country, scales = "free", ncol = 4) + 
+  #cowplot::theme_cowplot(font_size = 11) +
+  ggplot2::xlab("") + 
+  ggplot2::ylab("Percentage of symptomatic cases reported (%)")
+plotTemporal
+```
+
+*Figure 1: Temporal variation in reporting rate. We calculate the percentage of symptomatic cases reported on each day a country has had more than ten deaths. We then fit a Gaussian Process (GP) to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The red shaded region is the 95% CrI of fitted GP.*
+
+### Prevalence estimates
+
+```{r include = FALSE}
+prevalence_estimates <- readr::read_csv("https://raw.githubusercontent.com/cmmid/cmmid.github.io/master/topics/covid19/reports/currentPrevalenceEstimates_12_06_2020.csv") %>%
+  dplyr::select(-X1, -estimate, -lower, -upper) %>%
+  dplyr::mutate(prevalence = paste0(signif(propCurrentlyInfMid*100, 2), "%  (",
+                                    signif(propCurrentlyInfLow*100, 2), "% - ",
+                                    signif(propCurrentlyInfHigh*100, 2), "%)")) %>%
+  dplyr::select(country, totalCases, totalNewCases, population, prevalence)
+
+```
+
+```{r include=TRUE}
+knitr::kable(prevalence_estimates, col.names = c("Country",
+                                        "Total reported cases",
+                                        "New reported cases (tallied over last 10 days) ",
+                                        "Population",
+                                        "Prevalence (as % of population) mean and 95% CrI"), 
+                                        full_width = FALSE, format.args = list(big.mark = ","))
+```
+
+### Adjusted symptomatic case estimates
+
+```{r include = TRUE, fig.width = 10, fig.height = 40}
+trueCasePlot <- dataTrueCases %>%
+  dplyr::group_by(country) %>%
+  ggplot2::ggplot(ggplot2::aes(x = date)) +
+  #ggplot2::geom_line(ggplot2::aes(y = trueCasesMid)) + 
+  ggplot2::geom_ribbon(ggplot2::aes(ymin = trueCasesLow, ymax = trueCasesHigh), fill = "dodgerblue", alpha = 0.4) + 
+  ggplot2::facet_wrap(~country, scales = "free", ncol = 4) + 
+  #cowplot::theme_cowplot(font_size = 11) +
+  ggplot2::xlab("") + 
+  ggplot2::ylab("Estimated number of new symptomatic cases")
+trueCasePlot
+```
+
+*Figure 2: Estimated number of new symptomatic cases, calculated using our temporal under-reporting estimates. We adjust the reported case numbers each day - for each country with an under-reporting estimate - using our temporal under-reporting estimates to arrive at an estimate of the true number of symptomatic cases each day. The shaded blue region represents the 95% CrI, calcuated directly using the 95% CrI of the temporal under-reporting estimate.*
+
+### Reported cases
+
+```{r include = TRUE, fig.width = 10, fig.height = 40}
+trueCasePlot <- dataTrueCases %>%
+  dplyr::group_by(country) %>%
+  ggplot2::ggplot(ggplot2::aes(x = date)) +
+  ggplot2::geom_col(ggplot2::aes(y = cases), width = 0.5, color = "dodgerblue", alpha = 0.7) + 
+  #ggplot2::geom_ribbon(ggplot2::aes(ymin = trueCasesLow, ymax = trueCasesHigh), fill = "dodgerblue", alpha = 0.2) + 
+  ggplot2::facet_wrap(~country, scales = "free", ncol = 4) + 
+  #cowplot::theme_cowplot(font_size = 11) +
+  ggplot2::xlab("") + 
+  ggplot2::ylab("Number of new reported cases")
+trueCasePlot
+```
+
+*Figure 3: Reported number of cases each day, pulled from the [ECDC](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and plotted against time for comparison with our estimated true numbers of symptomatic cases each day, adjusted using our under-reporting estimates.*
+
+### Table of current estimates
+
+```{r include=TRUE}
+knitr::kable(dataTable, col.names = c("Country",
+                                        "Percentage of symptomatic cases reported (95% CI)",
+                                        "Total cases",
+                                        "Total deaths"), 
+                                        full_width = FALSE, format.args = list(big.mark = ","))
+```
+
+*Table 1: Estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates based on case and death timeseries data from the ECDC. Total cases and deaths in each country is also shown. Confidence intervals calculated using an exact binomial test with 95% significance.*
+
+
+## Adjusting for outcome delay in CFR estimates
+
+During an outbreak, the naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [@kucharski2014case, @nishiura2009early]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [@russell2020estimating].
+
+We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B in [@@linton2020incubation]). The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days [@linton2020incubation].
+
+To correct the CFR, we use the case and death incidence data to estimate the proportion of cases with known outcomes [@nishiura2009early; @russell2020estimating]:
+
+$$
+u_{t} = \frac{ \sum_{j = 0}^{t} c_{t-j} f_j}{c_t},
+$$ 
+
+where $u_t$ represents the underestimation of the proportion of cases with known outcomes [@kucharski2014case; @nishiura2009early; @russell2020estimating] and is used to scale the value of the cumulative number of cases in the denominator in the calculation of the cCFR, $c_{t}$ is the daily case incidence at time, $t$ and $f_t$ is the proportion of cases with delay of $t$ between confirmation and death.
+
+## Approximating the proportion of symptomatic cases reported
+
+At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [@russell2020estimating; @verity2020estimates; @guan2020clinical]. We assume a CFR of 1.4% (95% CrI: 1.2-1.7%), taken from a recent large study [@guan2020clinical], as a baseline CFR. We use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation $\frac{1.4\%}{\text{cCFR}}$ of each country to estimate an approximate fraction of cases reported.
+
+## Temporal variation model fitting
+
+We estimate the level of under-reporting on every day for each country that has had more than ten deaths. We then fit a Gaussian Process (GP) model using the library greta and greta.gp. The parameters we fit and their priors are the following: 
+$$ \begin{aligned}
+  &\sigma \sim \text{Log Normal(-1, 1)}: \quad  &\text{Variance of the reporting kernel} \\
+  &\text{L} \sim \text{Log Normal(4, 0.5)}: \quad  &\text{Lengthscale of the reporting kernel} \\
+  &\sigma_{\text{obs}} \sim \text{Truncated Normal(0, 0.5)}, \quad &\text{Variance of the obseration kernel, truncated at 0}
+  \end{aligned}
+$$
+The kernel is split into two components: the reporting kernel $R$, and the observation kernel $O$. The reporting component has a standard squared-exponential form. For the observation component, we use an i.i.d. noise kernel to acccount for observation overdispersion, which can smooth out overly clumped death time-series. This is important as some countries have been known to report an unusually large number of deaths on a single day, due to past under-reporting. 
+
+In the sampling and fitting process, we calculate the expected number of deaths at each time-point, given the baseline CFR. We then use a Poisson likelihood, where the expected number of deaths is the rate of the Poisson likelihood, given the observed number of deaths 
+
+
+## Adjusting case counts for under-reporting
+
+We adjust the reported number of cases each day, pulled from the [ECDC](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide). Specifically, we divide the case numbers of each day by our "proportion of cases reported" estimates that we calculate each day for each country.*
+
+## Limitations
+
+Implicit in assuming that the under-reporting is $\frac{1.4\%}{\text{cCFR}}$ for a given country is that the deviation away from the assumed 1.4% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.4% CFR estimates, along with many other country specific factors.
+
+The following is a list of the other prominent assumptions made in our analysis:
+
+* We assume that people get tested upon hospitalisation. A few examples where this is not the case are Germany and South Korea, where people can get tested earlier.
+
+* We assume that hospitalisation to death from early Wuhan is representative of the all the other countries (by using the distribution parameterised using early Wuhan data) and that all countries have the same risk and age profile as Wuhan.
+
+* Severity of COVID-19 is known to increase with age. Therefore, countries with older populations will naturally see higher death rates. We are extending this analysis to adjust for the age distribution for countries with more than five reported deaths and where age distribution data is available.
+
+* All results are linked and biased by the baseline CFR, assumed at 1.4% [@guan2020clinical].
+
+* The under-reporting estimate is sensitive to the baseline CFR, meaning that small errors in it lead to large errors in the estimate for under-reporting.
+
+* There are several sources of uncertainty in this analysis: the reported mean and SD of the delay distribution; the cCFR for each country (on each day) and the baseline CFR. We use the lower and upper mean and SD of the delay distribution to produce the widest interval. The other two uncertainties are just carried through directly in the subsequent calculations, which is crude. An ongoing extension is developing this into a fully Bayesian model, which deals with these different uncertainties more rigorously.
+
+## Code and data availability
+
+The code is publically available at https://github.com/thimotei/CFR_calculation. The data required for this analysis is a time-series for both cases and deaths, along with the corresponding delay distribution. We scrape this data from [ECDC](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide), using the NCoVUtils package [@nCovUtils2019]. 
+
+The under-reporting estimates for all countries can be downloaded as a single .csv file [here](https://raw.githubusercontent.com/cmmid/cmmid.github.io/master/topics/covid19/reports/under_ascertainment_estimates.csv). 
+
+Similarly, global prevalence estimates can be downloaded as a single .csv file [here](https://raw.githubusercontent.com/cmmid/cmmid.github.io/master/topics/covid19/reports/currentPrevalenceEstimates_12_06_2020.csv)
+ 
+## Acknowledgements
+
+The authors, on behalf of the Centre for the Mathematical Modelling of Infectious Diseases (CMMID) COVID-19 working group, wish to thank DSTL for providing the High Performance Computing facilities and associated expertise that has enabled these models to be prepared, run and processed and in an appropriately-rapid and highly efficient manner.
+ 
+## References
+
+<div id = 'refs'></div>
+
+
