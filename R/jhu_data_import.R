@@ -32,8 +32,10 @@ jhu_data_import <- function()
     .[, iso3c := countrycode(country,
                              'country.name',
                              'iso3c',
-                             custom_match = c("Micronesia" = "FSM",
-                                              "Kosovo" = "XXK"))] %>% 
+                             custom_match = c("Arica y Parinacota" = "AYP", "Tarapacá" = "TPA", "Antofagasta" = "ANT",
+                             "Atacama" = "ATM", "Coquimbo" = "CQB", "Valparaíso" = "VPO", "Santiago" = "STO", "O’Higgins" = "OHG", 
+                             "Maule" = "MLE", "Ñuble" = "NBL", "Biobío" = "BIO", "Araucanía" = "ARC", "Los Ríos" = "LRS",
+                             "Los Lagos" = "LLS", "Aysén" = "AYN", "Magallanes" = "MGN"))] %>% 
     .[is.na(iso3c) == FALSE] %>% 
     # # # setcolorder("iso3c") %>% 
     .[order(country, date)] %>% 
@@ -58,8 +60,10 @@ jhu_data_import <- function()
     .[, iso3c := countrycode(country,
                              'country.name',
                              'iso3c',
-                             custom_match = c("Micronesia" = "FSM",
-                                              "Kosovo" = "XXK"))] %>% 
+                             custom_match = c("Arica y Parinacota" = "AYP", "Tarapacá" = "TPA", "Antofagasta" = "ANT", 
+                             "Atacama" = "ATM", "Coquimbo" = "CQB", "Valparaíso" = "VPO", "Santiago" = "STO", "O’Higgins" = "OHG", 
+                             "Maule" = "MLE", "Ñuble" = "NBL", "Biobío" = "BIO", "Araucanía" = "ARC", "Los Ríos" = "LRS",
+                             "Los Lagos" = "LLS", "Aysén" = "AYN", "Magallanes" = "MGN"))] %>% 
     .[is.na(iso3c) == FALSE] %>% 
     setcolorder("iso3c") %>% 
     .[order(country, date)] %>% 

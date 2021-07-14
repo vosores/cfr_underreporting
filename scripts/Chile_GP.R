@@ -53,21 +53,41 @@ jhu_data <- jhu_data_import()
 #--- timeseries on standard computers
 
 #--- choosing which country to run the full inference for
-# # # iso_arg <- "CHL"
-# # # inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
-# # #     # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
-# # #     dplyr::filter(date > "2020-03-01")
 
-# # # prediction <- run_bayesian_model(inference_data,
-# # #                                  n_inducing = 5,
-# # #                                  cfr_baseline = cfr_baseline,
-# # #                                  cfr_range = cfr_range,
-# # #                                  cfr_trend = NULL,
-# # #                                  verbose = TRUE)
+#--- Codigos por region
+#--- "Arica y Parinacota" = "AYP", 
+#--- "Tarapacá" = "TPA", 
+#--- "Antofagasta" = "ANT", 
+#--- "Atacama" = "ATM", 
+#--- "Coquimbo" = "CQB", 
+#--- "Valparaíso" = "VPO", 
+#--- "Santiago" = "STO", 
+#--- "O’Higgins" = "OHG", 
+#--- "Maule" = "MLE", 
+#--- "Ñuble" = "NBL", 
+#--- "Biobío" = "BIO", 
+#--- "Araucanía" = "ARC", 
+#--- "Los Ríos" = "LRS",
+#--- "Los Lagos" = "LLS", 
+#--- "Aysén" = "AYN", 
+#--- "Magallanes" = "MGN"
 
 
-# # # # write.csv(prediction, file = "data/prediction_CHL.csv", row.names = FALSE)
-# # # saveRDS(prediction, file = paste(paste("data/result_dici",iso_arg,sep=""),".rds",sep=""))  
+iso_arg <- "TPA"
+inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
+    # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
+    dplyr::filter(date > "2021-03-01")
+
+prediction <- run_bayesian_model(inference_data,
+                                 n_inducing = 5,
+                                 cfr_baseline = cfr_baseline,
+                                 cfr_range = cfr_range,
+                                 cfr_trend = NULL,
+                                 verbose = TRUE)
+
+
+write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
+saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))  
 
 
 # # ci_poly <- tibble::tibble(x = c(plot_data$date, rev(plot_data$date)),

@@ -32,7 +32,7 @@ under_reporting_data <- getFigure1UnderReportingData()
 
 #--- making plot
 # Figura para Chile
-png(paste(path,"figures/under_rep_CHL_all_marzo.png",sep=""), width = 10, height = 8, units = "in", res = 100)
+png(paste(path,"figures/under_rep_CHL.png",sep=""), width = 10, height = 8, units = "in", res = 100)
 fontsize1 <- 1
 figure_under(under_reporting_data, testing_data, "CHL")
 
