@@ -64,8 +64,8 @@ deaths.loc[0] = info_deaths
 
 i=1
 for region in regiones:
-    info_confirmados = [region ,"Chile",-35.6751,-71543]
-    info_muertes = [region ,"Chile",-35.6751,-71543]
+    info_confirmados = [" " ,region,-35.6751,-71543]
+    info_muertes = [" " ,region,-35.6751,-71543]
     for j in df[df["Region"] == region].Contagiados:
         info_confirmados.append(int(j))
     for j in df[df["Region"] == region].Muertes:
