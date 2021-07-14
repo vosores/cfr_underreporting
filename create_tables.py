@@ -74,5 +74,5 @@ for region in regiones:
     deaths.loc[i] = info_muertes
     i = i+1
 
-confirmed.to_csv("./data/covid19_confirmed_chile.csv",index = False)
-deaths.to_csv("./data/covid19_deaths_chile.csv",index = False)
+confirmed.to_csv("./data/covid19_confirmed_chile_fmt.csv",index = False)
+deaths.to_csv("./data/covid19_deaths_chile_fmt.csv",index = False)

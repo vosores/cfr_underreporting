@@ -6,11 +6,11 @@ jhu_data_import <- function()
 {
   #--- setting the urls for the raw data. cases and deaths are separate in the 
   #--- raw data
-  jhu_cases_path <- "https://raw.githubusercontent.com/cssegisanddata/covid-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
-  # # # jhu_cases_path <- "https://raw.githubusercontent.com/vosores/prueba/main/covid_19_time_series/covid19_confirmed_chile.csv"
+  # # # jhu_cases_path <- "https://raw.githubusercontent.com/cssegisanddata/covid-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+  jhu_cases_path <- "https://raw.githubusercontent.com/vosores/cfr_underreporting/main/data/covid19_confirmed_chile.csv"
   
-  jhu_deaths_path <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
-  # # # jhu_deaths_path <- "https://raw.githubusercontent.com/vosores/prueba/main/covid_19_time_series/covid19_deaths_chile.csv"
+  # # # jhu_deaths_path <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+  jhu_deaths_path <- "https://raw.githubusercontent.com/vosores/cfr_underreporting/main/data/covid19_deaths_chile.csv"
 
 
   #--- reading in, melting and cleaning the case data
