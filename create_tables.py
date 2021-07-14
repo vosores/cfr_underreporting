@@ -8,18 +8,29 @@ import statsmodels.stats.diagnostic as smd
 import os
 
 out_folder = 'images'
-
+regiones = ['Arica y Parinacota','Tarapacá','Antofagasta','Atacama','Coquimbo','Valparaíso','Santiago'
+,'O’Higgins','Maule','Ñuble','Biobío','Araucanía','Los Ríos','Los Lagos','Aysén','Magallanes']
 #########################################################################
 #       crea csv para calcular undereporting actualizado.               #
 #########################################################################
 
+##Para Chile
 df = pd.read_csv ("./data/COVID_Chile_Regiones_sin_provincias.csv", sep = ";")
 df = df.dropna(subset = ['Region'])
 df = df.groupby("Fecha", as_index=False).sum()
 df["Fecha_dt"] = pd.to_datetime (df["Fecha"])
+df =df[df["Fecha_dt"] >= '2020-03-18']
 df = df.sort_values(by=["Fecha_dt"])
 df = df.reset_index(drop=True)
-# df = df[(df["Contagiados"] > 100)]
+df_c=df
+##Otro
+df = pd.read_csv ("./data/COVID_Chile_Regiones_sin_provincias.csv", sep = ";")
+df = df.dropna(subset = ['Region'])
+df["Fecha_dt"] = pd.to_datetime (df["Fecha"])
+df =df[df["Fecha_dt"] >= '2020-03-18']
+# df = df[df["Region"] == "Maule"]
+# df = df_c["Fecha_dt"]
+print(df[df["Region"] == "Maule"].Contagiados)
 
 # FECHA_INICIAL = '2020-03-18'
 # FECHA_FINAL = '2021-05-13'
@@ -28,8 +39,10 @@ df = df.reset_index(drop=True)
 # FECHAS = pd.to_datetime(FECHAS)
 # print(df)
 
+
+
 columns = ["Province/State","Country/Region","Lat","Long"]
-for fecha in df.Fecha_dt:
+for fecha in df_c.Fecha_dt:
     columns.append(fecha.strftime("%m/%d/%Y"))
 
 
@@ -39,14 +52,27 @@ deaths = pd.DataFrame(columns=columns)
 
 info_conf = [" " ,"Chile",-35.6751,-71543]
 info_deaths = [" " ,"Chile",-35.6751,-71543]
-for i in df.Contagiados:
+for i in df_c.Contagiados:
     info_conf.append(int(i))
 
-for i in df.Muertes:
+for i in df_c.Muertes:
     info_deaths.append(int(i))
 
 
 confirmed.loc[0] = info_conf
-confirmed.to_csv("covid19_confirmed_chile.csv",index = False)
 deaths.loc[0] = info_deaths
-deaths.to_csv("covid19_deaths_chile.csv",index = False)
+
+i=1
+for region in regiones:
+    info_confirmados = [region ,"Chile",-35.6751,-71543]
+    info_muertes = [region ,"Chile",-35.6751,-71543]
+    for j in df[df["Region"] == region].Contagiados:
+        info_confirmados.append(int(j))
+    for j in df[df["Region"] == region].Muertes:
+        info_muertes.append(int(j))
+    confirmed.loc[i] = info_confirmados
+    deaths.loc[i] = info_muertes
+    i = i+1
+
+confirmed.to_csv("./data/covid19_confirmed_chile.csv",index = False)
+deaths.to_csv("./data/covid19_deaths_chile.csv",index = False)
