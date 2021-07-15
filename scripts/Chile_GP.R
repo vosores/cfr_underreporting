@@ -54,7 +54,8 @@ jhu_data <- jhu_data_import()
 
 #--- choosing which country to run the full inference for
 
-#--- Codigos por region
+#--- Codigos por region inventados.
+#--- "Chile" = "CHL",
 #--- "Arica y Parinacota" = "AYP", 
 #--- "Tarapacá" = "TPA", 
 #--- "Antofagasta" = "ANT", 
@@ -73,7 +74,7 @@ jhu_data <- jhu_data_import()
 #--- "Magallanes" = "MGN"
 
 
-iso_arg <- "TPA"
+iso_arg <- "CHL"
 inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
     # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
     dplyr::filter(date > "2021-03-01")

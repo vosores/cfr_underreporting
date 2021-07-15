@@ -142,7 +142,8 @@ regiones = {"Chile": ["CHL", "Chile"],
     "Magallanes": ["MGN", "Magallanes"]
     }
 
-for region in ["Arica y Parinacota", "Aysén"]:
+for region in ["Chile", "Arica y Parinacota", "Tarapacá", "Antofagasta", "Atacama", "Coquimbo", "Valparaíso", "Santiago", 
+"O’Higgins", "Maule", "Ñuble", "Biobío", "Araucanía", "Los Ríos", "Los Lagos", "Aysén", "Magallanes"]:
     df = pd.read_csv ("./data/current_estimates_extracted_not_age_adjusted/result_" + regiones[region][0] +".csv")
     FECHA_INICIAL = df["date"][0]
     FECHAS = np.array([pd.to_datetime (FECHA_INICIAL) + datetime.timedelta(days=i) for i in range(df.shape[0])])
