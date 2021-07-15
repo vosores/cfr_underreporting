@@ -1,0 +1,217 @@
+
+R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(reticulate)
+> use_condaenv('r-reticulate', required = TRUE)
+> library(greta)
+
+Attaching package: ‘greta’
+
+The following objects are masked from ‘package:stats’:
+
+    binomial, cov2cor, poisson
+
+The following objects are masked from ‘package:base’:
+
+    %*%, apply, backsolve, beta, chol2inv, colMeans, colSums, diag,
+    eigen, forwardsolve, gamma, identity, rowMeans, rowSums, sweep,
+    tapply
+
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:516: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:517: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:518: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:519: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:520: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:525: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:541: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:542: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:543: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:544: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:545: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/shared/victorosores/.local/share/r-miniconda/envs/r-reticulate/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:550: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+> library(greta.gp)
+> library(magrittr)
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:greta’:
+
+    slice
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library(lubridate, warn.conflicts = FALSE)
+> 
+> # if tensorflow is not installed to a virtual
+> # environment/conda environment, run this command
+> # to get the right versions of tensorflow installed
+> 
+> #greta::install_tensorflow(method = "conda",
+>                           #version = "1.14.0",
+>                           #extra_packages = "tensorflow-probability==0.7")
+> 
+> # Temporal variation in reporting - bayesian model framework
+> # Fit gaussian process model using greta.gp to under-reporting estimates over time
+> 
+> # Set paths
+> setwd("/home/shared/victorosores/cfr_underreporting/")
+> 
+> #source data processing and plotting scripts
+> source('R/jhu_data_import.R')
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:lubridate’:
+
+    hour, isoweek, mday, minute, month, quarter, second, wday, week,
+    yday, year
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.3.5     ✔ purrr   0.3.4
+✔ tibble  3.1.2     ✔ stringr 1.4.0
+✔ tidyr   1.1.3     ✔ forcats 0.5.1
+✔ readr   1.4.0     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ lubridate::as.difftime() masks base::as.difftime()
+✖ data.table::between()    masks dplyr::between()
+✖ lubridate::date()        masks base::date()
+✖ tidyr::extract()         masks magrittr::extract()
+✖ dplyr::filter()          masks stats::filter()
+✖ data.table::first()      masks dplyr::first()
+✖ data.table::hour()       masks lubridate::hour()
+✖ lubridate::intersect()   masks base::intersect()
+✖ data.table::isoweek()    masks lubridate::isoweek()
+✖ dplyr::lag()             masks stats::lag()
+✖ data.table::last()       masks dplyr::last()
+✖ data.table::mday()       masks lubridate::mday()
+✖ data.table::minute()     masks lubridate::minute()
+✖ data.table::month()      masks lubridate::month()
+✖ data.table::quarter()    masks lubridate::quarter()
+✖ data.table::second()     masks lubridate::second()
+✖ purrr::set_names()       masks magrittr::set_names()
+✖ lubridate::setdiff()     masks base::setdiff()
+✖ dplyr::slice()           masks greta::slice()
+✖ purrr::transpose()       masks data.table::transpose()
+✖ lubridate::union()       masks base::union()
+✖ data.table::wday()       masks lubridate::wday()
+✖ data.table::week()       masks lubridate::week()
+✖ data.table::yday()       masks lubridate::yday()
+✖ data.table::year()       masks lubridate::year()
+> source('R/scale_cfr_temporal.R')
+> source('R/cases_known_convolution.R')
+> source('R/run_bayesian_model.R')
+> 
+> # setting baseline level CFR
+> cfr_baseline <- 1.4
+> cfr_range <- c(1.2, 1.7)
+> 
+> # Set parameters
+> mean <- 13
+> median <- 9.1
+> 
+> mu_cfr <- log(median)
+> sigma_cfr <- sqrt(2*(log(mean) - mu_cfr))
+> 
+> # Hospitalisation to death distribution
+> hospitalisation_to_death_truncated <- function(x) {
++   plnorm(x + 1, mu_cfr, sigma_cfr) - plnorm(x, mu_cfr, sigma_cfr)
++ }
+> 
+> #--- Load and clean data using separate function
+> jhu_data <- jhu_data_import()
+> 
+> #--- inference is compute and memory heavy
+> #--- a HPC is used to run the inference for many countries/regions
+> #--- therefore we pick a single country here to run 
+> #--- we also only run it for the timeseries from September 2020
+> #--- as there are memory allocation issues when running it with a longer
+> #--- timeseries on standard computers
+> 
+> #--- choosing which country to run the full inference for
+> 
+> #--- Codigos por region inventados.
+> #--- "Chile" = "CHL",
+> #--- "Arica y Parinacota" = "AYP", 
+> #--- "Tarapacá" = "TPA", 
+> #--- "Antofagasta" = "ANT", 
+> #--- "Atacama" = "ATM", 
+> #--- "Coquimbo" = "CQB", 
+> #--- "Valparaíso" = "VPO", 
+> #--- "Santiago" = "STO", 
+> #--- "O’Higgins" = "OHG", 
+> #--- "Maule" = "MLE", 
+> #--- "Ñuble" = "NBL", 
+> #--- "Biobío" = "BIO", 
+> #--- "Araucanía" = "ARC", 
+> #--- "Los Ríos" = "LRS",
+> #--- "Los Lagos" = "LLS", 
+> #--- "Aysén" = "AYN", 
+> #--- "Magallanes" = "MGN"
+> 
+> # # # for (iso in c("CHL", "AYP", "TPA", "ANT", "ATM", "CQB", "VPO", "STO", "OHG", "MLE", "NBL", "BIO", "ARC", "LRS", "LLS", 
+> # # # "AYN", "MGN")) {
+> iso_arg <- read.csv(file = 'scripts/iso.csv')$iso
+> inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
++     # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
++     dplyr::filter(date > "2021-01-01")
+Warning message:
+In min.default(numeric(0), na.rm = FALSE) :
+  no non-missing arguments to min; returning Inf
+> 
+> prediction <- run_bayesian_model(inference_data,
++                                 n_inducing = 5,
++                                 cfr_baseline = cfr_baseline,
++                                 cfr_range = cfr_range,
++                                 cfr_trend = NULL,
++                                 verbose = TRUE)
+running model for Magallanes
+
+running 200 chains simultaneously on up to 8 cores
+
+    warmup                                           0/1000 | eta:  ?s              warmup ==                                       50/1000 | eta:  4m | 2% bad     warmup ====                                    100/1000 | eta:  3m | 1% bad     warmup ======                                  150/1000 | eta:  3m | <1% bad    warmup ========                                200/1000 | eta:  3m | <1% bad    warmup ==========                              250/1000 | eta:  3m | <1% bad    warmup ===========                             300/1000 | eta:  2m | <1% bad    warmup =============                           350/1000 | eta:  2m | <1% bad    warmup ===============                         400/1000 | eta:  2m | 1% bad     warmup =================                       450/1000 | eta:  2m | 2% bad     warmup ===================                     500/1000 | eta:  2m | 2% bad     warmup =====================                   550/1000 | eta:  1m | 2% bad     warmup =======================                 600/1000 | eta:  1m | 2% bad     warmup =========================               650/1000 | eta:  1m | 2% bad     warmup ===========================             700/1000 | eta:  1m | 2% bad     warmup ============================            750/1000 | eta: 50s | 2% bad     warmup ==============================          800/1000 | eta: 40s | 3% bad     warmup ================================        850/1000 | eta: 30s | 3% bad     warmup ==================================      900/1000 | eta: 20s | 3% bad     warmup ====================================    950/1000 | eta: 10s | 3% bad     warmup ====================================== 1000/1000 | eta:  0s | 3% bad 
+  sampling                                           0/1000 | eta:  ?s            sampling ==                                       50/1000 | eta:  3m            sampling ====                                    100/1000 | eta:  3m | 3% bad   sampling ======                                  150/1000 | eta:  3m | 3% bad   sampling ========                                200/1000 | eta:  3m | 4% bad   sampling ==========                              250/1000 | eta:  2m | 4% bad   sampling ===========                             300/1000 | eta:  2m | 4% bad   sampling =============                           350/1000 | eta:  2m | 4% bad   sampling ===============                         400/1000 | eta:  2m | 4% bad   sampling =================                       450/1000 | eta:  2m | 4% bad   sampling ===================                     500/1000 | eta:  2m | 3% bad   sampling =====================                   550/1000 | eta:  1m | 3% bad   sampling =======================                 600/1000 | eta:  1m | 3% bad   sampling =========================               650/1000 | eta:  1m | 3% bad   sampling ===========================             700/1000 | eta:  1m | 3% bad   sampling ============================            750/1000 | eta: 48s | 3% bad   sampling ==============================          800/1000 | eta: 39s | 4% bad   sampling ================================        850/1000 | eta: 29s | 3% bad   sampling ==================================      900/1000 | eta: 19s | 3% bad   sampling ====================================    950/1000 | eta: 10s | 3% bad   sampling ====================================== 1000/1000 | eta:  0s | 3% bad 
+> 
+> 
+> write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
+> saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))
+> q(save = 'no')
+> proc.time()
+    user   system  elapsed 
+1933.516  152.126  874.934 

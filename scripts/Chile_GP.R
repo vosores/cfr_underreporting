@@ -73,22 +73,27 @@ jhu_data <- jhu_data_import()
 #--- "Aysén" = "AYN", 
 #--- "Magallanes" = "MGN"
 
-
-iso_arg <- "CHL"
+# # # for (iso in c("CHL", "AYP", "TPA", "ANT", "ATM", "CQB", "VPO", "STO", "OHG", "MLE", "NBL", "BIO", "ARC", "LRS", "LLS", 
+# # # "AYN", "MGN")) {
+iso_arg <- read.csv(file = 'scripts/iso.csv')$iso
 inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
     # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
-    dplyr::filter(date > "2021-03-01")
+    dplyr::filter(date > "2021-01-01")
 
 prediction <- run_bayesian_model(inference_data,
-                                 n_inducing = 5,
-                                 cfr_baseline = cfr_baseline,
-                                 cfr_range = cfr_range,
-                                 cfr_trend = NULL,
-                                 verbose = TRUE)
+                                n_inducing = 5,
+                                cfr_baseline = cfr_baseline,
+                                cfr_range = cfr_range,
+                                cfr_trend = NULL,
+                                verbose = TRUE)
 
 
 write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
-saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))  
+saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))
+q(save = 'no')
+# # # } 
+
+
 
 
 # # ci_poly <- tibble::tibble(x = c(plot_data$date, rev(plot_data$date)),
