@@ -138,6 +138,11 @@ The following objects are masked from ‘package:dplyr’:
 > source('R/cases_known_convolution.R')
 > source('R/run_bayesian_model.R')
 > 
+> # Fechas
+> fecha_ini <- "2020-02-01"
+> fecha_end <- "2020-06-01"
+> countries = "yes"
+> 
 > # setting baseline level CFR
 > cfr_baseline <- 1.4
 > cfr_range <- c(1.2, 1.7)
@@ -156,6 +161,13 @@ The following objects are masked from ‘package:dplyr’:
 > 
 > #--- Load and clean data using separate function
 > jhu_data <- jhu_data_import()
+Warning messages:
+1: In countrycode(country, "country.name", "iso3c", custom_match = c(`Arica y Parinacota` = "AYP",  :
+  Some values were not matched unambiguously: Diamond Princess, Kosovo, Micronesia, MS Zaandam, Summer Olympics 2020
+
+2: In countrycode(country, "country.name", "iso3c", custom_match = c(`Arica y Parinacota` = "AYP",  :
+  Some values were not matched unambiguously: Diamond Princess, Kosovo, Micronesia, MS Zaandam, Summer Olympics 2020
+
 > 
 > #--- inference is compute and memory heavy
 > #--- a HPC is used to run the inference for many countries/regions
@@ -189,11 +201,11 @@ The following objects are masked from ‘package:dplyr’:
 > # # # "AYN", "MGN")) {
 > iso_arg <- read.csv(file = 'scripts/iso.csv')$iso
 > inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
-+     # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
-+     dplyr::filter(date > "2021-01-01")
++     dplyr::filter(date > fecha_ini & date < fecha_end)
 Warning message:
 In min.default(numeric(0), na.rm = FALSE) :
   no non-missing arguments to min; returning Inf
+>     # dplyr::filter(date > fecha_ini)
 > 
 > prediction <- run_bayesian_model(inference_data,
 +                                 n_inducing = 5,
@@ -201,17 +213,20 @@ In min.default(numeric(0), na.rm = FALSE) :
 +                                 cfr_range = cfr_range,
 +                                 cfr_trend = NULL,
 +                                 verbose = TRUE)
-running model for Magallanes
+running model for Italy, desde 2020-02-12
 
 running 200 chains simultaneously on up to 8 cores
 
-    warmup                                           0/1000 | eta:  ?s              warmup ==                                       50/1000 | eta:  4m | 2% bad     warmup ====                                    100/1000 | eta:  3m | 1% bad     warmup ======                                  150/1000 | eta:  3m | <1% bad    warmup ========                                200/1000 | eta:  3m | <1% bad    warmup ==========                              250/1000 | eta:  3m | <1% bad    warmup ===========                             300/1000 | eta:  2m | <1% bad    warmup =============                           350/1000 | eta:  2m | <1% bad    warmup ===============                         400/1000 | eta:  2m | 1% bad     warmup =================                       450/1000 | eta:  2m | 2% bad     warmup ===================                     500/1000 | eta:  2m | 2% bad     warmup =====================                   550/1000 | eta:  1m | 2% bad     warmup =======================                 600/1000 | eta:  1m | 2% bad     warmup =========================               650/1000 | eta:  1m | 2% bad     warmup ===========================             700/1000 | eta:  1m | 2% bad     warmup ============================            750/1000 | eta: 50s | 2% bad     warmup ==============================          800/1000 | eta: 40s | 3% bad     warmup ================================        850/1000 | eta: 30s | 3% bad     warmup ==================================      900/1000 | eta: 20s | 3% bad     warmup ====================================    950/1000 | eta: 10s | 3% bad     warmup ====================================== 1000/1000 | eta:  0s | 3% bad 
-  sampling                                           0/1000 | eta:  ?s            sampling ==                                       50/1000 | eta:  3m            sampling ====                                    100/1000 | eta:  3m | 3% bad   sampling ======                                  150/1000 | eta:  3m | 3% bad   sampling ========                                200/1000 | eta:  3m | 4% bad   sampling ==========                              250/1000 | eta:  2m | 4% bad   sampling ===========                             300/1000 | eta:  2m | 4% bad   sampling =============                           350/1000 | eta:  2m | 4% bad   sampling ===============                         400/1000 | eta:  2m | 4% bad   sampling =================                       450/1000 | eta:  2m | 4% bad   sampling ===================                     500/1000 | eta:  2m | 3% bad   sampling =====================                   550/1000 | eta:  1m | 3% bad   sampling =======================                 600/1000 | eta:  1m | 3% bad   sampling =========================               650/1000 | eta:  1m | 3% bad   sampling ===========================             700/1000 | eta:  1m | 3% bad   sampling ============================            750/1000 | eta: 48s | 3% bad   sampling ==============================          800/1000 | eta: 39s | 4% bad   sampling ================================        850/1000 | eta: 29s | 3% bad   sampling ==================================      900/1000 | eta: 19s | 3% bad   sampling ====================================    950/1000 | eta: 10s | 3% bad   sampling ====================================== 1000/1000 | eta:  0s | 3% bad 
+    warmup                                           0/1000 | eta:  ?s              warmup ==                                       50/1000 | eta:  3m | 16% bad    warmup ====                                    100/1000 | eta:  3m | 9% bad     warmup ======                                  150/1000 | eta:  2m | 39% bad    warmup ========                                200/1000 | eta:  2m | 54% bad    warmup ==========                              250/1000 | eta:  2m | 63% bad    warmup ===========                             300/1000 | eta:  2m | 69% bad    warmup =============                           350/1000 | eta:  1m | 74% bad    warmup ===============                         400/1000 | eta:  1m | 77% bad    warmup =================                       450/1000 | eta:  1m | 69% bad    warmup ===================                     500/1000 | eta:  1m | 62% bad    warmup =====================                   550/1000 | eta:  1m | 56% bad    warmup =======================                 600/1000 | eta:  1m | 52% bad    warmup =========================               650/1000 | eta: 49s | 48% bad    warmup ===========================             700/1000 | eta: 42s | 44% bad    warmup ============================            750/1000 | eta: 36s | 41% bad    warmup ==============================          800/1000 | eta: 29s | 39% bad    warmup ================================        850/1000 | eta: 22s | 36% bad    warmup ==================================      900/1000 | eta: 15s | 34% bad    warmup ====================================    950/1000 | eta:  7s | 33% bad    warmup ====================================== 1000/1000 | eta:  0s | 31% bad
+  sampling                                           0/1000 | eta:  ?s            sampling ==                                       50/1000 | eta:  2m            sampling ====                                    100/1000 | eta:  2m            sampling ======                                  150/1000 | eta:  2m            sampling ========                                200/1000 | eta:  2m            sampling ==========                              250/1000 | eta:  2m            sampling ===========                             300/1000 | eta:  2m            sampling =============                           350/1000 | eta:  2m            sampling ===============                         400/1000 | eta:  2m            sampling =================                       450/1000 | eta:  1m            sampling ===================                     500/1000 | eta:  1m            sampling =====================                   550/1000 | eta:  1m            sampling =======================                 600/1000 | eta:  1m            sampling =========================               650/1000 | eta:  1m            sampling ===========================             700/1000 | eta: 47s            sampling ============================            750/1000 | eta: 39s            sampling ==============================          800/1000 | eta: 32s            sampling ================================        850/1000 | eta: 24s            sampling ==================================      900/1000 | eta: 16s            sampling ====================================    950/1000 | eta:  8s            sampling ====================================== 1000/1000 | eta:  0s          
 > 
-> 
-> write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
-> saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))
+> if (countries == "no"){
++   write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted_all_dates/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
++ # saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))
++ } else {
++   write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted_countries/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
++ }
 > q(save = 'no')
 > proc.time()
     user   system  elapsed 
-1933.516  152.126  874.934 
+1407.790  122.089  632.215 

@@ -95,7 +95,8 @@ run_bayesian_model <- function (data,
   
   if (verbose) {
     country <- data$country[1]
-    message("running model for ", country)
+    fecha <- data$date[1]
+    message("running model for ", country, ", desde ", fecha)
   }
   
   # draw a bunch of mcmc samples

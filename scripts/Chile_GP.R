@@ -26,6 +26,11 @@ source('R/scale_cfr_temporal.R')
 source('R/cases_known_convolution.R')
 source('R/run_bayesian_model.R')
 
+# Fechas
+fecha_ini <- "2020-02-01"
+fecha_end <- "2020-06-01"
+countries = "yes"
+
 # setting baseline level CFR
 cfr_baseline <- 1.4
 cfr_range <- c(1.2, 1.7)
@@ -77,8 +82,8 @@ jhu_data <- jhu_data_import()
 # # # "AYN", "MGN")) {
 iso_arg <- read.csv(file = 'scripts/iso.csv')$iso
 inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
-    # dplyr::filter(date > "2020-04-01" & date < "2020-06-15")
-    dplyr::filter(date > "2021-01-01")
+    dplyr::filter(date > fecha_ini & date < fecha_end)
+    # dplyr::filter(date > fecha_ini)
 
 prediction <- run_bayesian_model(inference_data,
                                 n_inducing = 5,
@@ -87,9 +92,12 @@ prediction <- run_bayesian_model(inference_data,
                                 cfr_trend = NULL,
                                 verbose = TRUE)
 
-
-write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
-saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))
+if (countries == "no"){
+  write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted_all_dates/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
+# saveRDS(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted/result_",iso_arg,sep=""),".rds",sep=""))
+} else {
+  write.csv(prediction, file = paste(paste("data/current_estimates_extracted_not_age_adjusted_countries/result_",iso_arg,sep=""),".csv",sep=""), row.names = FALSE)
+}
 q(save = 'no')
 # # # } 
 
